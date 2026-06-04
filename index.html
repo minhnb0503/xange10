@@ -3,34 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tìm Trạm Xăng Petrolimex & PVOIL E10 Hà Nội</title>
+    <title>Radar Xăng Sinh Học E10 - Hightech Dashboard</title>
     <!-- Tailwind CSS làm giao diện trực quan, scannable -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Thư viện bản đồ Leaflet miễn phí (Đã sửa lỗi đóng thẻ chuẩn chỉnh) -->
+    <!-- Thư viện bản đồ Leaflet miễn phí -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    
     <style>
-        #map { height: 450px; cursor: crosshair; }
+        #map { height: 480px; cursor: crosshair; }
+        /* Tùy biến thanh cuộn phong cách hi-tech */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #ea580c; }
+        
+        /* Đè giao diện Dark Mode cho Popup của bản đồ Leaflet */
+        .leaflet-popup-content-wrapper, .leaflet-popup-tip {
+            background-color: #0f172a !important;
+            color: #f8fafc !important;
+            border: 1px solid #334155 !important;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.6) !important;
+        }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans antialiased">
+<body class="bg-[#05070f] text-slate-200 font-sans antialiased selection:bg-orange-500/30">
 
     <div class="max-w-6xl mx-auto p-4">
-        <!-- Khu vực tiêu đề -->
-        <header class="text-center my-4">
-            <h1 class="text-2xl md:text-3xl font-black text-orange-600 tracking-tight">HỆ THỐNG ĐỊNH VỊ XĂNG E10 (PETROLIMEX & PVOIL)</h1>
-            <p class="text-slate-500 mt-1 text-xs md:text-sm">Mẹo: Bạn có thể chọn nhanh theo Quận hoặc **click chuột trực tiếp lên bản đồ** để sửa lại vị trí nếu GPS nhận sai.</p>
+        <!-- KHU VỰC HEADER CÔNG NGHỆ CAO -->
+        <header class="text-center my-5 relative">
+            <div class="absolute inset-0 bg-gradient-to-r from-orange-500/10 to-blue-500/10 blur-3xl -z-10"></div>
+            <h1 class="text-2xl md:text-3xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-orange-500 via-amber-400 to-blue-400 uppercase">
+                E10 BIO-FUEL RADAR SYSTEM
+            </h1>
+            <p class="text-slate-500 mt-1 text-xs md:text-sm font-mono tracking-widest uppercase">
+                Hệ thống định vị & quét trạm xăng sinh học E10 RON 95-V tại Hà Nội
+            </p>
         </header>
 
-        <!-- BẢNG ĐIỀU KHIỂN BỘ LỌC VÀ TÌM KIẾM CẢI TIẾN -->
-        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-6 space-y-4">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <!-- BẢNG ĐIỀU KHIỂN RADA (BỘ LỌC) -->
+        <div class="bg-slate-900/60 backdrop-blur-md p-4 rounded-xl shadow-[0_0_20px_rgba(0,0,0,0.4)] border border-slate-800/80 mb-6 space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 
                 <!-- Bộ lọc chọn Quận/Huyện -->
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-1">1. Chọn Quận để xem trạm có E10:</label>
-                    <select id="select-district" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 font-semibold cursor-pointer">
-                        <option value="">-- Tất cả Quận có xăng E10 --</option>
+                <div class="relative">
+                    <label class="block text-[11px] font-mono uppercase tracking-wider text-slate-400 mb-1.5 flex items-center gap-1">
+                        <span class="inline-block w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></span>
+                        Khu vực trích xuất dữ liệu:
+                    </label>
+                    <select id="select-district" class="w-full bg-slate-950/90 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:ring-1 focus:ring-orange-500 focus:border-orange-500 font-semibold cursor-pointer transition-all">
+                        <option value="">-- Toàn bộ khu vực Hà Nội --</option>
                         <option value="Thanh Xuân">Quận Thanh Xuân</option>
                         <option value="Đống Đa">Quận Đống Đa</option>
                         <option value="Cầu Giấy">Quận Cầu Giấy</option>
@@ -47,39 +69,42 @@
 
                 <!-- Thanh tìm kiếm gõ chữ theo tên đường -->
                 <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-1">2. Hoặc gõ tên đường hoặc thương hiệu:</label>
-                    <input type="text" id="search-keyword" placeholder="Ví dụ: Nguyễn Trãi, PVOIL, Láng..." 
-                           class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                    <label class="block text-[11px] font-mono uppercase tracking-wider text-slate-400 mb-1.5 flex items-center gap-1">
+                        <span class="inline-block w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
+                        Bộ lọc từ khóa / Tên đường:
+                    </label>
+                    <input type="text" id="search-keyword" placeholder="Nhập tên phố hoặc hãng (PVOIL, Láng...)" 
+                           class="w-full bg-slate-950/90 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-orange-500 focus:border-orange-500 transition-all">
                 </div>
 
                 <!-- Nút Định vị GPS để tìm trạm gần nhất -->
                 <div class="flex items-end">
-                    <button id="btn-find" class="w-full bg-orange-500 hover:bg-orange-600 active:scale-95 text-white font-bold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center justify-center gap-2 text-sm h-[38px]">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <button id="btn-find" class="w-full bg-gradient-to-r from-orange-600 to-amber-500 hover:from-orange-500 hover:to-amber-400 active:scale-[0.98] text-slate-950 font-black py-2 px-4 rounded-lg transition duration-150 shadow-[0_0_15px_rgba(234,88,12,0.3)] flex items-center justify-center gap-2 text-sm h-[38px] uppercase tracking-wider">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 animate-spin-slow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                         </svg>
-                        Bật GPS tìm trạm E10 gần tôi nhất
+                        Quét GPS tìm trạm gần nhất
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- Thanh trạng thái định vị -->
-        <div id="status-message" class="hidden p-3 mb-4 text-xs font-semibold rounded-lg border"></div>
+        <!-- THANH TRẠNG THÁI HỆ THỐNG -->
+        <div id="status-message" class="hidden p-3 mb-4 text-xs font-mono rounded-lg border bg-slate-950/80 text-emerald-400 border-emerald-900/50 shadow-[0_0_10px_rgba(16,185,129,0.1)]"></div>
 
-        <!-- Khung hiển thị Bản đồ và Danh sách kết quả -->
+        <!-- KHUNG HIỂN THỊ CHÍNH (MAP VÀ LIST) -->
         <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
             <!-- Cột trái: Bản đồ (Chiếm 3 phần) -->
-            <div class="lg:col-span-3 bg-white p-2 rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="lg:col-span-3 bg-slate-900/40 p-2 rounded-xl shadow-lg border border-slate-800 overflow-hidden relative">
                 <div id="map" class="rounded-lg"></div>
             </div>
 
             <!-- Cột phải: Danh sách các trạm (Chiếm 2 phần) -->
-            <div class="lg:col-span-2 bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col h-[466px]">
-                <h2 class="text-base font-extrabold border-b pb-2 text-slate-700 mb-3 flex justify-between items-center">
-                    <span>Cây xăng có E10 tìm thấy</span>
-                    <span id="result-count" class="text-xs bg-orange-100 px-2.5 py-1 rounded-full font-bold text-orange-700">0 trạm</span>
+            <div class="lg:col-span-2 bg-slate-900/40 p-4 rounded-xl shadow-lg border border-slate-800 flex flex-col h-[496px]">
+                <h2 class="text-sm font-mono uppercase tracking-widest border-b border-slate-800 pb-3 text-slate-400 mb-3 flex justify-between items-center">
+                    <span>Kết quả quét tín hiệu</span>
+                    <span id="result-count" class="text-xs bg-orange-500/10 border border-orange-500/30 px-2.5 py-0.5 rounded-full font-bold text-orange-400">0 trạm</span>
                 </h2>
                 
                 <!-- Khu vực danh sách cuộn -->
@@ -233,13 +258,15 @@
         let userLat = null;
         let userLng = null;
 
+        // Khởi tạo bản đồ lấy tâm tại Hà Nội, chuyển sang gói bản đồ nền Dark Matter cực chất của CartoDB
         const map = L.map('map').setView([21.028511, 105.804817], 12);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap'
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://carto.com/">CARTO</a>'
         }).addTo(map);
 
         const markerGroup = L.layerGroup().addTo(map);
 
+        // Công thức tính khoảng cách hình học Haversine (km)
         function calculateDistance(lat1, lon1, lat2, lon2) {
             const R = 6371; 
             const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -251,22 +278,30 @@
             return R * c; 
         }
 
+        // HÀM LỌC VÀ HIỂN THỊ CHÍNH XÁC
         function filterAndRenderStations() {
             markerGroup.clearLayers();
 
             const selectedDistrict = document.getElementById('select-district').value.toLowerCase();
             const searchKeyword = document.getElementById('search-keyword').value.toLowerCase().trim();
 
+            // 1. THIẾT KẾ CÀI ĐẶT ICON CHO VỊ TRÍ CỦA BẠN (Sóng rada Cyan phát sáng)
             if (userLat && userLng) {
                 const userIcon = L.divIcon({
-                    className: 'user-marker',
-                    html: "<div style='background-color:#ef4444; width:16px; height:16px; border-radius:50%; border:3px solid white; box-shadow: 0 0 8px rgba(0,0,0,0.5);'></div>",
-                    iconSize: [16, 16],
-                    iconAnchor: [8, 8]
+                    className: 'user-marker-hightech',
+                    html: `
+                        <div class="relative flex h-5 w-5">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-5 w-5 bg-cyan-500 border-2 border-slate-950 shadow-[0_0_10px_#22d3ee]"></span>
+                        </div>
+                    `,
+                    iconSize: [20, 20],
+                    iconAnchor: [10, 10]
                 });
-                L.marker([userLat, userLng], { icon: userIcon }).addTo(markerGroup).bindPopup("<b>Vị trí hiện tại của bạn</b>").openPopup();
+                L.marker([userLat, userLng], { icon: userIcon }).addTo(markerGroup).bindPopup("<b class='text-cyan-400 font-mono'>MỤC TIÊU ĐỊNH VỊ (VỊ TRÍ CỦA BẠN)</b>").openPopup();
             }
 
+            // Tiến hành lọc trạm
             let filteredResults = hangXangHanoiData.filter(station => {
                 const hasE10 = station.fuels.includes("E10 RON 95-V");
                 
@@ -295,7 +330,7 @@
             listContainer.innerHTML = "";
 
             if (filteredResults.length === 0) {
-                listContainer.innerHTML = '<p class="text-slate-400 text-center py-12 font-medium">Khu vực này hiện tại không có trạm nào bán xăng E10 RON 95-V.</p>';
+                listContainer.innerHTML = '<p class="text-slate-500 text-center py-16 font-mono border border-dashed border-slate-800 rounded-lg">NO SIGNALS FOUND IN THIS SECTOR.</p>';
                 return;
             }
 
@@ -306,28 +341,29 @@
                 viewBounds.push([station.lat, station.lng]);
 
                 const distanceHtml = (userLat && userLng && station.distance) ? 
-                    `<span class="text-[11px] font-black text-orange-600 bg-orange-50 border border-orange-100 px-1.5 py-0.5 rounded whitespace-nowrap">~${station.distance.toFixed(2)} km</span>` : '';
+                    `<span class="text-[11px] font-mono font-black text-emerald-400 bg-emerald-950/40 border border-emerald-500/20 px-2 py-0.5 rounded shadow-[0_0_8px_rgba(16,185,129,0.1)]">RANGE: ~${station.distance.toFixed(2)} KM</span>` : '';
 
                 const tagsHtml = station.fuels.map(f => {
                     const isE10 = f === "E10 RON 95-V";
-                    return `<span class="inline-block text-[9px] font-extrabold mr-1 px-1.5 py-0.5 rounded ${isE10 ? 'bg-orange-600 text-white shadow-sm font-black' : 'bg-slate-100 text-slate-600'}">${f}</span>`;
+                    return `<span class="inline-block text-[9px] font-mono font-bold mr-1 px-1.5 py-0.5 rounded ${isE10 ? 'bg-orange-500/20 text-orange-400 border border-orange-500/40 shadow-[0_0_6px_rgba(234,88,12,0.2)]' : 'bg-slate-950 text-slate-500 border border-slate-800'}">${f}</span>`;
                 }).join("");
 
-                const brandBorderColor = station.brand === "PETROLIMEX" ? "border-l-orange-500" : "border-l-yellow-500";
+                // Phân biệt màu thương hiệu trên giao diện list bên phải
+                const brandBorderColor = station.brand === "PETROLIMEX" ? "border-l-orange-500 shadow-[0_0_10px_rgba(234,88,12,0.05)]" : "border-l-blue-500 shadow-[0_0_10px_rgba(37,99,235,0.05)]";
                 const brandBadgeHtml = station.brand === "PETROLIMEX" ? 
-                    `<span class="bg-orange-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded mr-1">PETROLIMEX</span>` : 
-                    `<span class="bg-blue-600 text-yellow-300 text-[9px] font-black px-1.5 py-0.5 rounded mr-1">PVOIL</span>`;
+                    `<span class="bg-orange-500/10 text-orange-400 border border-orange-500/30 text-[9px] font-mono font-bold px-1.5 py-0.5 rounded">PETROLIMEX</span>` : 
+                    `<span class="bg-blue-500/10 text-blue-400 border border-blue-500/30 text-[9px] font-mono font-bold px-1.5 py-0.5 rounded">PVOIL</span>`;
 
                 const itemDiv = document.createElement('div');
-                itemDiv.className = `p-3 border border-slate-200 rounded-lg bg-white hover:bg-orange-50/60 hover:border-orange-300 transition-all duration-200 cursor-pointer shadow-sm border-l-4 ${brandBorderColor}`;
+                itemDiv.className = `p-3 border border-slate-800/80 rounded-lg bg-slate-900/30 hover:bg-slate-800/50 hover:border-slate-700 transition-all duration-150 cursor-pointer border-l-4 ${brandBorderColor}`;
                 itemDiv.innerHTML = `
-                    <div class="flex justify-between items-start gap-2 mb-1">
-                        <h3 class="font-extrabold text-slate-800 text-xs flex items-center flex-wrap gap-1">
+                    <div class="flex justify-between items-start gap-2 mb-1.5">
+                        <h3 class="font-bold text-slate-200 text-xs flex items-center flex-wrap gap-1.5">
                             ${brandBadgeHtml} ${idx + 1}. ${station.name}
                         </h3>
                         ${distanceHtml}
                     </div>
-                    <p class="text-slate-600 text-[11px] mb-2 font-semibold bg-slate-50 p-2 rounded border border-slate-100 leading-relaxed">${station.address}</p>
+                    <p class="text-slate-400 text-[11px] mb-2 font-medium leading-relaxed bg-slate-950/50 p-2 rounded border border-slate-800/60">${station.address}</p>
                     <div class="flex flex-wrap gap-1">${tagsHtml}</div>
                 `;
 
@@ -338,12 +374,26 @@
 
                 listContainer.appendChild(itemDiv);
 
-                const mapMarker = L.marker([station.lat, station.lng]).addTo(markerGroup);
+                // 2. PHÂN TÁCH MÀU SẮC ICON TRÊN BẢN ĐỒ CHO TỪNG BÊN CÂY XĂNG (Neon Ring)
+                const isPetro = station.brand === "PETROLIMEX";
+                const stationIcon = L.divIcon({
+                    className: 'station-marker-hightech',
+                    html: `
+                        <div class="relative flex h-5 w-5">
+                            <span class="absolute inline-flex h-full w-full rounded-full ${isPetro ? 'bg-orange-500/30' : 'bg-blue-500/30'} animate-pulse"></span>
+                            <span class="relative inline-flex rounded-full h-5 w-5 ${isPetro ? 'bg-orange-600 shadow-[0_0_12px_#ea580c]' : 'bg-blue-600 shadow-[0_0_12px_#2563eb]'} border-2 border-slate-900"></span>
+                        </div>
+                    `,
+                    iconSize: [16, 16],
+                    iconAnchor: [8, 8]
+                });
+
+                const mapMarker = L.marker([station.lat, station.lng], { icon: stationIcon }).addTo(markerGroup);
                 mapMarker.bindPopup(`
-                    <div style="font-family: sans-serif; line-height: 1.4; font-size: 11px; width: 190px;">
-                        <b style="color: ${station.brand === 'PETROLIMEX' ? '#ea580c' : '#1d4ed8'}; font-size: 12px; display: block; margin-bottom: 3px;">[${station.brand}] ${station.name}</b>
-                        <p style="color: #334155; margin: 0 0 5px 0; font-weight: 600;">${station.address}</p>
-                        ${(userLat && userLng && station.distance) ? `<span style="font-weight: bold; color: #1e293b;">Cách bạn: ~${station.distance.toFixed(2)} km</span>` : ''}
+                    <div class="font-mono text-[11px] space-y-1" style="width: 200px;">
+                        <b style="color: ${isPetro ? '#f97316' : '#60a5fa'}; font-size: 12px; display: block; letter-spacing: 0.5px;">[${station.brand}] ${station.name}</b>
+                        <p style="color: #94a3b8; font-weight: 500; margin: 3px 0;">${station.address}</p>
+                        ${(userLat && userLng && station.distance) ? `<div style="border-top: 1px dashed #334155; padding-top: 4px; margin-top: 4px;" class="text-emerald-400 font-bold">KHOẢNG CÁCH: ~${station.distance.toFixed(2)} KM</div>` : ''}
                     </div>
                 `);
             });
@@ -353,14 +403,15 @@
             }
         }
 
+        // Click chuột thẳng lên nền tối bản đồ để ghim vị trí chuẩn bằng tay
         map.on('click', function(e) {
             userLat = e.latlng.lat;
             userLng = e.latlng.lng;
 
             const statusEl = document.getElementById('status-message');
             statusEl.classList.remove('hidden');
-            statusEl.className = "p-3 mb-4 text-xs font-semibold rounded-lg border bg-green-50 text-green-700 border-green-200";
-            statusEl.innerText = "Đã ghim vị trí của bạn bằng tay! Hệ thống đã tính lại số km đến các trạm Petrolimex & PVOIL.";
+            statusEl.className = "p-3 mb-4 text-xs font-mono rounded-lg border bg-slate-950/80 text-cyan-400 border-cyan-900/50 shadow-[0_0_10px_rgba(34,211,238,0.1)]";
+            statusEl.innerText = `[TỌA ĐỘ ĐÃ ĐƯỢC THIẾT LẬP THỦ CÔNG KHỚP VỚI ĐIỂM CLICK CHUỘT TRÊN MẠNG BẢN ĐỒ]`;
 
             document.getElementById('select-district').value = "";
             document.getElementById('search-keyword').value = "";
@@ -377,12 +428,12 @@
 
             const statusEl = document.getElementById('status-message');
             statusEl.classList.remove('hidden');
-            statusEl.className = "p-3 mb-4 text-xs font-semibold rounded-lg border bg-blue-50 text-blue-700 border-blue-200";
-            statusEl.innerText = "Hệ thống đang định vị GPS để tìm trạm xăng gần bạn nhất...";
+            statusEl.className = "p-3 mb-4 text-xs font-mono rounded-lg border bg-slate-950/80 text-orange-400 border-orange-950";
+            statusEl.innerText = "ĐANG KHỞI CHẠY HỆ THỐNG QUÉT GPS VỆ TINH TOÀN DIỆN...";
 
             if (!navigator.geolocation) {
-                statusEl.className = "p-3 mb-4 text-xs font-semibold rounded-lg border bg-red-50 text-red-700 border-red-200";
-                statusEl.innerText = "Trình duyệt không hỗ trợ GPS.";
+                statusEl.className = "p-3 mb-4 text-xs font-mono rounded-lg border bg-red-950/80 text-red-400 border-red-900";
+                statusEl.innerText = "LỖI: THIẾT BỊ KHÔNG HỖ TRỢ PHẦN CỨNG GPS.";
                 return;
             }
 
@@ -391,14 +442,14 @@
                     userLat = position.coords.latitude;
                     userLng = position.coords.longitude;
                     
-                    statusEl.className = "p-3 mb-4 text-xs font-semibold rounded-lg border bg-green-50 text-green-700 border-green-200";
-                    statusEl.innerText = "Định vị thành công! Đã quét và sắp xếp các trạm từ gần đến xa.";
+                    statusEl.className = "p-3 mb-4 text-xs font-mono rounded-lg border bg-slate-950/80 text-emerald-400 border-emerald-950";
+                    statusEl.innerText = "ĐỊNH VỊ THÀNH CÔNG. DỮ LIỆU KHOẢNG CÁCH THỰC TẾ ĐÃ ĐƯỢC ĐỒNG BỘ.";
                     
                     filterAndRenderStations();
                 },
                 (error) => {
-                    statusEl.className = "p-3 mb-4 text-xs font-semibold rounded-lg border bg-red-50 text-red-700 border-red-200";
-                    statusEl.innerText = "Lỗi GPS. Bạn hãy dùng chuột CLICK trực tiếp lên vị trí của mình trên bản đồ nhé.";
+                    statusEl.className = "p-3 mb-4 text-xs font-mono rounded-lg border bg-red-950/80 text-red-400 border-red-900";
+                    statusEl.innerText = "TÍN HIỆU GPS PHÒNG MÁY BỊ CHẶN. VUI LÒNG CLICK THẲNG LÊN BẢN ĐỒ ĐỂ CHỌN VỊ TRÍ.";
                 },
                 { enableHighAccuracy: true, timeout: 10000 }
             );
