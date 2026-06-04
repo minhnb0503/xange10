@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tìm Trạm Xăng Petrolimex E10 RON 95-V Hà Nội</title>
+    <title>Tìm Trạm Xăng Petrolimex & PVOIL E10 Hà Nội</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -15,8 +15,8 @@
 
     <div class="max-w-6xl mx-auto p-4">
         <header class="text-center my-4">
-            <h1 class="text-2xl md:text-3xl font-black text-orange-600 tracking-tight">HỆ THỐNG ĐỊNH VỊ XĂNG SINH HỌC E10</h1>
-            <p class="text-slate-500 mt-1 text-xs md:text-sm">Mẹo: Nếu GPS nhận sai, bạn hãy **click chuột trực tiếp lên bản đồ** để chọn lại vị trí chuẩn của mình.</p>
+            <h1 class="text-2xl md:text-3xl font-black text-orange-600 tracking-tight">HỆ THỐNG ĐỊNH VỊ XĂNG E10 (PETROLIMEX & PVOIL)</h1>
+            <p class="text-slate-500 mt-1 text-xs md:text-sm">Bản đồ tra cứu các trạm xăng có sẵn loại xăng sinh học cao cấp E10 RON 95-V tại Hà Nội.</p>
         </header>
 
         <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-6 space-y-4">
@@ -36,12 +36,13 @@
                         <option value="Long Biên">Quận Long Biên</option>
                         <option value="Hà Đông">Quận Hà Đông</option>
                         <option value="Nam Từ Liêm">Quận Nam Từ Liêm</option>
+                        <option value="Hoàng Mai">Quận Hoàng Mai</option>
                     </select>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-1">2. Hoặc gõ tên đường/phố cần tìm:</label>
-                    <input type="text" id="search-keyword" placeholder="Ví dụ: Nguyễn Trãi, Láng, Xuân Thủy..." 
+                    <label class="block text-xs font-bold text-slate-600 mb-1">2. Hoặc gõ tên đường hoặc thương hiệu:</label>
+                    <input type="text" id="search-keyword" placeholder="Ví dụ: Nguyễn Trãi, PVOIL, Láng..." 
                            class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
                 </div>
 
@@ -51,7 +52,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
-                        Tự động định vị bằng GPS
+                        Bật GPS tìm trạm E10 gần tôi nhất
                     </button>
                 </div>
             </div>
@@ -66,7 +67,7 @@
 
             <div class="lg:col-span-2 bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col h-[466px]">
                 <h2 class="text-base font-extrabold border-b pb-2 text-slate-700 mb-3 flex justify-between items-center">
-                    <span>Trạm xăng E10 RON 95-V</span>
+                    <span>Cây xăng có E10 tìm thấy</span>
                     <span id="result-count" class="text-xs bg-orange-100 px-2.5 py-1 rounded-full font-bold text-orange-700">0 trạm</span>
                 </h2>
                 
@@ -77,98 +78,149 @@
     </div>
 
     <script>
-        // KHO DỮ LIỆU ĐỊA CHỈ THỰC TẾ CHI TIẾT CÁC TRẠM XĂNG BÁN E10 TẠI HÀ NỘI
-        const petrolimexHanoiE10 = [
+        // KHO DỮ LIỆU HỢP NHẤT: CẢ CÂY XĂNG PETROLIMEX VÀ PVOIL BÁN XĂNG E10 TẠI HÀ NỘI
+        const hangXangHanoiData = [
+            // === DỮ LIỆU CÁC TRẠM PETROLIMEX ===
             {
+                brand: "PETROLIMEX",
                 name: "CHXD Số 43 - Petrolimex Nguyễn Trãi",
                 address: "Số 497 Đường Nguyễn Trãi, Phường Thanh Xuân Nam, Quận Thanh Xuân, Hà Nội",
                 lat: 20.992145, lng: 105.801245,
                 fuels: ["E5 RON 92", "RON 95-III", "E10 RON 95-V", "DO 0,05S-II"]
             },
             {
+                brand: "PETROLIMEX",
                 name: "CHXD Số 70 - Petrolimex Khuất Duy Tiến",
                 address: "Số 164 Đường Khuất Duy Tiến, Phường Nhân Chính, Quận Thanh Xuân, Hà Nội",
                 lat: 20.998450, lng: 105.799610,
                 fuels: ["E5 RON 92", "RON 95-V", "E10 RON 95-V"]
             },
             {
+                brand: "PETROLIMEX",
                 name: "CHXD Số 31 - Petrolimex Láng Hạ",
                 address: "Số 95 Đường Láng Hạ, Phường Láng Hạ, Quận Đống Đa, Hà Nội",
                 lat: 21.015422, lng: 105.812678,
                 fuels: ["E5 RON 92", "RON 95-V", "E10 RON 95-V", "DO 0,001S-V"]
             },
             {
+                brand: "PETROLIMEX",
                 name: "CHXD Số 02 - Petrolimex Đường Láng",
                 address: "Số 111 Đường Láng, Phường Thịnh Quang, Quận Đống Đa, Hà Nội",
                 lat: 21.009410, lng: 105.819230,
                 fuels: ["E5 RON 92", "RON 95-III", "E10 RON 95-V"]
             },
             {
+                brand: "PETROLIMEX",
                 name: "CHXD Số 15 - Petrolimex Xuân Thủy",
                 address: "Số 171 Đường Xuân Thủy, Phường Dịch Vọng Hậu, Quận Cầu Giấy, Hà Nội",
                 lat: 21.036980, lng: 105.783245,
                 fuels: ["E5 RON 92", "RON 95-III", "E10 RON 95-V", "DO 0,05S-II"]
             },
             {
+                brand: "PETROLIMEX",
                 name: "CHXD Số 52 - Petrolimex Nguyễn Phong Sắc",
                 address: "Số 1 Đường Nguyễn Phong Sắc, Phường Dịch Vọng, Quận Cầu Giấy, Hà Nội",
                 lat: 21.036410, lng: 105.792450,
                 fuels: ["E5 RON 92", "RON 95-V", "E10 RON 95-V"]
             },
             {
+                brand: "PETROLIMEX",
                 name: "CHXD Số 01 - Petrolimex Trần Khánh Dư",
                 address: "Số 1 Đường Trần Khánh Dư, Phường Phan Chu Trinh, Quận Hoàn Kiếm, Hà Nội",
                 lat: 21.016688, lng: 105.859438,
                 fuels: ["E5 RON 92", "RON 95-V", "E10 RON 95-V", "DO 0,001S-V"]
             },
             {
+                brand: "PETROLIMEX",
                 name: "CHXD Số 36 - Petrolimex Trần Hưng Đạo",
                 address: "Số 9 Đường Trần Hưng Đạo, Phường Phan Chu Trinh, Quận Hoàn Kiếm, Hà Nội",
                 lat: 21.018910, lng: 105.857630,
                 fuels: ["E5 RON 92", "E10 RON 95-V", "RON 95-III"]
             },
             {
+                brand: "PETROLIMEX",
                 name: "CHXD Số 10 - Petrolimex Hoàng Hoa Thám",
                 address: "Số 148 Đường Hoàng Hoa Thám, Phường Thụy Khuê, Quận Ba Đình, Hà Nội",
                 lat: 21.041210, lng: 105.821430,
                 fuels: ["E5 RON 92", "RON 95-III", "E10 RON 95-V"]
             },
             {
+                brand: "PETROLIMEX",
                 name: "CHXD Số 04 - Petrolimex Bạch Mai",
                 address: "Số 426 Đường Bạch Mai, Phường Bạch Mai, Quận Hai Bà Trưng, Hà Nội",
                 lat: 21.001240, lng: 105.851240,
                 fuels: ["E5 RON 92", "RON 95-V", "E10 RON 95-V"]
             },
             {
+                brand: "PETROLIMEX",
                 name: "CHXD Số 03 - Petrolimex Thụy Khuê",
                 address: "Số 249 Đường Thụy Khuê, Phường Thụy Khuê, Quận Tây Hồ, Hà Nội",
                 lat: 21.042890, lng: 105.819450,
                 fuels: ["E5 RON 92", "E10 RON 95-V", "RON 95-III"]
             },
             {
+                brand: "PETROLIMEX",
                 name: "CHXD Số 82 - Petrolimex Nguyễn Văn Cừ",
                 address: "Số 418 Đường Nguyễn Văn Cừ, Phường Gia Thụy, Quận Long Biên, Hà Nội",
                 lat: 21.047521, lng: 105.882143,
                 fuels: ["E5 RON 92", "RON 95-III", "E10 RON 95-V"]
             },
             {
+                brand: "PETROLIMEX",
                 name: "CHXD Số 22 - Petrolimex Trần Phú Hà Đông",
                 address: "Số 112 Đường Trần Phú, Phường Mộ Lao, Quận Hà Đông, Hà Nội",
                 lat: 20.979450, lng: 105.784120,
                 fuels: ["E5 RON 92", "RON 95-V", "E10 RON 95-V"]
             },
             {
+                brand: "PETROLIMEX",
                 name: "CHXD Số 55 - Petrolimex Lê Đức Thọ",
                 address: "Số 3 Đường Lê Đức Thọ, Phường Mỹ Đình 2, Quận Nam Từ Liêm, Hà Nội",
                 lat: 21.029410, lng: 105.771230,
                 fuels: ["E5 RON 92", "E10 RON 95-V", "DO 0,05S-II"]
+            },
+            // === DỮ LIỆU CÁC TRẠM PVOIL MỚI THÊM ===
+            {
+                brand: "PVOIL",
+                name: "CHXD PVOIL Khương Đình",
+                address: "Số 488 Đường Khương Đình, Phường Hạ Đình, Quận Thanh Xuân, Hà Nội",
+                lat: 20.984123, lng: 105.816452,
+                fuels: ["E5 RON 92", "RON 95-III", "E10 RON 95-V", "DO 0,05S-II"]
+            },
+            {
+                brand: "PVOIL",
+                name: "CHXD PVOIL Hào Nam",
+                address: "Số 96 Phố Hào Nam, Phường Ô Chợ Dừa, Quận Đống Đa, Hà Nội",
+                lat: 21.021234, lng: 105.825432,
+                fuels: ["E5 RON 92", "E10 RON 95-V", "RON 95-III"]
+            },
+            {
+                brand: "PVOIL",
+                name: "CHXD PVOIL Nghĩa Đô",
+                address: "Số 126 Đường Hoàng Quốc Việt, Phường Nghĩa Tân, Quận Cầu Giấy, Hà Nội",
+                lat: 21.046543, lng: 105.794321,
+                fuels: ["E5 RON 92", "RON 95-III", "E10 RON 95-V"]
+            },
+            {
+                brand: "PVOIL",
+                name: "CHXD PVOIL Nguyễn Khoái",
+                address: "Số 358 Đường Nguyễn Khoái, Phường Thanh Lương, Quận Hai Bà Trưng, Hà Nội",
+                lat: 21.002341, lng: 105.871234,
+                fuels: ["E5 RON 92", "E10 RON 95-V", "DO 0,05S-II"]
+            },
+            {
+                brand: "PVOIL",
+                name: "CHXD PVOIL Đền Lừ",
+                address: "Khu đô thị Đền Lừ, Phường Hoàng Văn Thụ, Quận Hoàng Mai, Hà Nội",
+                lat: 20.991234, lng: 105.858765,
+                fuels: ["E5 RON 92", "RON 95-III", "E10 RON 95-V"]
             }
         ];
 
         let userLat = null;
         let userLng = null;
 
-        // Khởi tạo bản đồ Leaflet lấy tâm mặc định tại Hà Nội
+        // Khởi tạo bản đồ lấy tâm mặc định tại Hà Nội
         const map = L.map('map').setView([21.028511, 105.804817], 12);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap'
@@ -188,14 +240,14 @@
             return R * c; 
         }
 
-        // HÀM LỌC CHÍNH XÁC
+        // HÀM LỌC CHÍNH XÁC DỮ LIỆU
         function filterAndRenderStations() {
             markerGroup.clearLayers();
 
             const selectedDistrict = document.getElementById('select-district').value.toLowerCase();
             const searchKeyword = document.getElementById('search-keyword').value.toLowerCase().trim();
 
-            // Vẽ ghim đỏ tại vị trí được xác định (hoặc do GPS hoặc do bấm tay trên bản đồ)
+            // Vẽ ghim đỏ tại vị trí của bạn (bấm tay hoặc GPS)
             if (userLat && userLng) {
                 const userIcon = L.divIcon({
                     className: 'user-marker',
@@ -206,8 +258,8 @@
                 L.marker([userLat, userLng], { icon: userIcon }).addTo(markerGroup).bindPopup("<b>Vị trí hiện tại của bạn</b>").openPopup();
             }
 
-            // Lọc các trạm có E10 khớp với Quận / từ khoá đường phố
-            let filteredResults = petrolimexHanoiE10.filter(station => {
+            // Tiến hành lọc: Chỉ lấy những trạm có E10 và khớp với Quận / từ khóa tìm kiếm
+            let filteredResults = hangXangHanoiData.filter(station => {
                 const hasE10 = station.fuels.includes("E10 RON 95-V");
                 
                 const matchDistrict = !selectedDistrict || 
@@ -216,12 +268,13 @@
                 
                 const matchKeyword = !searchKeyword || 
                                      station.name.toLowerCase().includes(searchKeyword) || 
-                                     station.address.toLowerCase().includes(searchKeyword);
+                                     station.address.toLowerCase().includes(searchKeyword) ||
+                                     station.brand.toLowerCase().includes(searchKeyword);
                 
                 return hasE10 && matchDistrict && matchKeyword;
             });
 
-            // Nếu có vị trí, tính số km thực tế và xếp từ gần đến xa
+            // Nếu có tọa độ, tính số km thực tế và xếp từ gần đến xa
             if (userLat && userLng) {
                 filteredResults = filteredResults.map(station => {
                     return { ...station, distance: calculateDistance(userLat, userLng, station.lat, station.lng) };
@@ -253,11 +306,19 @@
                     return `<span class="inline-block text-[9px] font-extrabold mr-1 px-1.5 py-0.5 rounded ${isE10 ? 'bg-orange-600 text-white shadow-sm font-black' : 'bg-slate-100 text-slate-600'}">${f}</span>`;
                 }).join("");
 
+                // Thiết lập màu sắc viền dựa theo thương hiệu cây xăng
+                const brandBorderColor = station.brand === "PETROLIMEX" ? "border-l-orange-500" : "border-l-yellow-500";
+                const brandBadgeHtml = station.brand === "PETROLIMEX" ? 
+                    `<span class="bg-orange-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded mr-1">PETROLIMEX</span>` : 
+                    `<span class="bg-blue-600 text-yellow-300 text-[9px] font-black px-1.5 py-0.5 rounded mr-1">PVOIL</span>`;
+
                 const itemDiv = document.createElement('div');
-                itemDiv.className = "p-3 border border-slate-200 rounded-lg bg-white hover:bg-orange-50/60 hover:border-orange-300 transition-all duration-200 cursor-pointer shadow-sm border-l-4 border-l-orange-500";
+                itemDiv.className = `p-3 border border-slate-200 rounded-lg bg-white hover:bg-orange-50/60 hover:border-orange-300 transition-all duration-200 cursor-pointer shadow-sm border-l-4 ${brandBorderColor}`;
                 itemDiv.innerHTML = `
                     <div class="flex justify-between items-start gap-2 mb-1">
-                        <h3 class="font-extrabold text-slate-800 text-xs">${idx + 1}. ${station.name}</h3>
+                        <h3 class="font-extrabold text-slate-800 text-xs flex items-center flex-wrap gap-1">
+                            ${brandBadgeHtml} ${idx + 1}. ${station.name}
+                        </h3>
                         ${distanceHtml}
                     </div>
                     <p class="text-slate-600 text-[11px] mb-2 font-semibold bg-slate-50 p-2 rounded border border-slate-100 leading-relaxed">${station.address}</p>
@@ -271,10 +332,11 @@
 
                 listContainer.appendChild(itemDiv);
 
+                // Cắm điểm ghim lên bản đồ
                 const mapMarker = L.marker([station.lat, station.lng]).addTo(markerGroup);
                 mapMarker.bindPopup(`
                     <div style="font-family: sans-serif; line-height: 1.4; font-size: 11px; width: 190px;">
-                        <b style="color: #ea580c; font-size: 12px; display: block; margin-bottom: 3px;">${station.name}</b>
+                        <b style="color: ${station.brand === 'PETROLIMEX' ? '#ea580c' : '#1d4ed8'}; font-size: 12px; display: block; margin-bottom: 3px;">[${station.brand}] ${station.name}</b>
                         <p style="color: #334155; margin: 0 0 5px 0; font-weight: 600;">${station.address}</p>
                         ${(userLat && userLng && station.distance) ? `<span style="font-weight: bold; color: #1e293b;">Cách bạn: ~${station.distance.toFixed(2)} km</span>` : ''}
                     </div>
@@ -286,7 +348,7 @@
             }
         }
 
-        // TÍNH NĂNG ĐẶC BIỆT: Lắng nghe sự kiện người dùng CLICK THẲNG LÊN BẢN ĐỒ để chọn vị trí
+        // Lắng nghe sự kiện click chuột thẳng lên bản đồ để sửa vị trí sai
         map.on('click', function(e) {
             userLat = e.latlng.lat;
             userLng = e.latlng.lng;
@@ -294,9 +356,8 @@
             const statusEl = document.getElementById('status-message');
             statusEl.classList.remove('hidden');
             statusEl.className = "p-3 mb-4 text-xs font-semibold rounded-lg border bg-green-50 text-green-700 border-green-200";
-            statusEl.innerText = "Đã ghim vị trí của bạn bằng tay trên bản đồ! Khoảng cách đến các trạm đã được tính toán lại.";
+            statusEl.innerText = "Đã ghim vị trí của bạn bằng tay! Hệ thống đã tính lại số km đến các trạm Petrolimex & PVOIL.";
 
-            // Xóa ô chọn quận để tính khoảng cách tổng quan xung quanh điểm vừa chọn
             document.getElementById('select-district').value = "";
             document.getElementById('search-keyword').value = "";
             
@@ -313,11 +374,11 @@
             const statusEl = document.getElementById('status-message');
             statusEl.classList.remove('hidden');
             statusEl.className = "p-3 mb-4 text-xs font-semibold rounded-lg border bg-blue-50 text-blue-700 border-blue-200";
-            statusEl.innerText = "Hệ thống đang định vị GPS để tìm trạm E10 gần bạn nhất...";
+            statusEl.innerText = "Hệ thống đang định vị GPS để tìm trạm xăng gần bạn nhất...";
 
             if (!navigator.geolocation) {
                 statusEl.className = "p-3 mb-4 text-xs font-semibold rounded-lg border bg-red-50 text-red-700 border-red-200";
-                statusEl.innerText = "Trình duyệt của bạn không hỗ trợ GPS.";
+                statusEl.innerText = "Trình duyệt không hỗ trợ GPS.";
                 return;
             }
 
@@ -327,13 +388,13 @@
                     userLng = position.coords.longitude;
                     
                     statusEl.className = "p-3 mb-4 text-xs font-semibold rounded-lg border bg-green-50 text-green-700 border-green-200";
-                    statusEl.innerText = "Định vị thành công! Đã quét và sắp xếp các trạm xăng E10 từ gần đến xa.";
+                    statusEl.innerText = "Định vị thành công! Đã quét và sắp xếp các trạm từ gần đến xa.";
                     
                     filterAndRenderStations();
                 },
                 (error) => {
                     statusEl.className = "p-3 mb-4 text-xs font-semibold rounded-lg border bg-red-50 text-red-700 border-red-200";
-                    statusEl.innerText = "Lỗi GPS máy tính. Bạn hãy dùng chuột CLICK trực tiếp lên vị trí của bạn trên bản đồ nhé.";
+                    statusEl.innerText = "Lỗi GPS. Bạn hãy dùng chuột CLICK trực tiếp lên vị trí của mình trên bản đồ nhé.";
                 },
                 { enableHighAccuracy: true, timeout: 10000 }
             );
